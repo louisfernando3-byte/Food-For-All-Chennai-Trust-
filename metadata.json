@@ -1,0 +1,6 @@
+{
+  "name": "Food For All Chennai Trust",
+  "description": "A transparent, high-impact NGO application that bridges donors and volunteers with Chennai's most vulnerable, providing direct support in food, education, medical care, clothing, and employment.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Custom Bento Palette */
+  --color-bento-primary: #c2410c;
+  --color-bento-peach: #fff1e6;
+  --color-bento-mint: #ecfdf5;
+  --color-bento-cream: #fdfcfb;
+  --color-bento-dark: #1a1a1a;
+  --color-bento-gray: #71717a;
+
+  --color-brand-50: #fff1e6;
+  --color-brand-100: #ffd8be;
+  --color-brand-500: #c2410c;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+  --color-brand-900: #7c2d12;
+}
+
+/* Base style refinements */
+body {
+  font-family: var(--font-sans);
+  background-color: #fdfcfb;
+  color: #1a1a1a;
+}
+
+/* Neo-brutalist Bento Card style helper */
+.bento-card {
+  background-color: #ffffff;
+  border: 2px solid #1a1a1a;
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow: 6px 6px 0px 0px rgba(26, 26, 26, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px rgba(26, 26, 26, 1);
+}
+
+.bento-card-peach {
+  background-color: #fff1e6;
+  border: 2px solid #1a1a1a;
+  border-radius: 1.5rem;
+  box-shadow: 6px 6px 0px 0px rgba(26, 26, 26, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card-peach:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px rgba(26, 26, 26, 1);
+}
+
+.bento-card-mint {
+  background-color: #ecfdf5;
+  border: 2px solid #1a1a1a;
+  border-radius: 1.5rem;
+  box-shadow: 6px 6px 0px 0px rgba(26, 26, 26, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card-mint:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px rgba(26, 26, 26, 1);
+}
+
+.bento-card-dark {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 2px solid #1a1a1a;
+  border-radius: 1.5rem;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card-dark:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* Neo-brutalist Button style helper */
+.bento-btn {
+  border: 2px solid #1a1a1a;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 4px 4px 0px 0px rgba(26, 26, 26, 1);
+  transition: all 0.1s ease;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bento-btn:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px rgba(26, 26, 26, 1);
+}
+
+.bento-btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px rgba(26, 26, 26, 1);
+}
+
+/* Custom scrollbars for a clean look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Micro-animations */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.pulse-circle {
+  animation: pulse-ring 2s infinite ease-in-out;
+}
