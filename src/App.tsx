@@ -24,7 +24,8 @@ import {
   ChevronRight,
   PlusCircle,
   Layers,
-  Sparkle
+  Sparkle,
+  Bell
 } from 'lucide-react';
 
 import { NeedRequest, VolunteerDrive, FinancialDonation, SupportCategory, ImpactStory } from './types';
@@ -57,6 +58,78 @@ export default function App() {
   const [preselectCategory, setPreselectCategory] = useState<string | null>(null);
   const [activeStoryIdx, setActiveStoryIdx] = useState(0);
 
+  // Volunteer Urgent Alerts & Local Push Notification states
+  const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
+  const [toasts, setToasts] = useState<any[]>([]);
+
+  // Local Push simulation trigger
+  const simulateNewUrgentDrive = () => {
+    const templates = [
+      {
+        title: "Urgent Flood Relief Meal Kitchen Support",
+        description: "Severe rains have flooded slum sectors in Vyasarpadi. Volunteers needed immediately to pack and distribute 500 hot dinner kits.",
+        category: "Food",
+        location: "Vyasarpadi Community Hall, Chennai",
+        coordinatorName: "Ramakrishnan S.",
+        coordinatorPhone: "+91 95514 12420",
+        spotsMax: 25,
+        spotsRegistered: 4
+      },
+      {
+        title: "Urgent Pavement Food Delivery: Royapuram",
+        description: "Immediate requirement of 3 volunteers with motorbikes to distribute packed midnight bread-milk kits to elderly pavement dwellers in Royapuram.",
+        category: "Food",
+        location: "Royapuram Flyover Junction, Chennai",
+        coordinatorName: "Deepa Priyadharshini",
+        coordinatorPhone: "+91 73055 41420",
+        spotsMax: 6,
+        spotsRegistered: 2
+      },
+      {
+        title: "Emergency Slum Rain Shelter Dry Rations",
+        description: "Distribution of urgent waterproof tarpaulins and dry grocery packets to 150 families in Perambur.",
+        category: "Food",
+        location: "Perambur Railway Colony Slum, Chennai",
+        coordinatorName: "Dr. Arvind Nathan",
+        coordinatorPhone: "+91 95514 12420",
+        spotsMax: 15,
+        spotsRegistered: 8
+      }
+    ];
+
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    const newDrive = {
+      id: `sim-drive-${Date.now()}`,
+      ...template,
+      date: new Date().toISOString().split('T')[0],
+      time: "Immediate Support (Next 4 Hours)",
+      isUrgent: true,
+    };
+
+    setDrives((prev) => [newDrive, ...prev]);
+
+    if (alertsEnabled) {
+      const toastId = `toast-${Date.now()}`;
+      const newToast = {
+        id: toastId,
+        title: `🚨 Urgent: ${newDrive.title}`,
+        message: `${newDrive.location} needs immediate volunteers. Click to view!`,
+        driveId: newDrive.id,
+      };
+      setToasts((prev) => [...prev, newToast]);
+
+      // Auto-dismiss toast after 7 seconds
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== toastId));
+      }, 7000);
+
+      if (activeTab !== 'volunteer') {
+        setUnreadAlertsCount((prev) => prev + 1);
+      }
+    }
+  };
+
   // Load backend data
   const loadAllData = async () => {
     try {
@@ -86,6 +159,22 @@ export default function App() {
     }, 6000);
     return () => clearInterval(timer);
   }, []);
+
+  // Sync to clear unread counts when user navigates to volunteer tab
+  useEffect(() => {
+    if (activeTab === 'volunteer') {
+      setUnreadAlertsCount(0);
+    }
+  }, [activeTab]);
+
+  // Periodic simulated posts when live monitor is enabled
+  useEffect(() => {
+    if (!alertsEnabled) return;
+    const interval = setInterval(() => {
+      simulateNewUrgentDrive();
+    }, 45000);
+    return () => clearInterval(interval);
+  }, [alertsEnabled, activeTab]);
 
   // API Call Handlers
   const handleAddNeed = async (formData: any) => {
@@ -508,7 +597,13 @@ export default function App() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
                     >
-                      <VolunteerHubView drives={drives} onSignup={handleSignupVolunteer} />
+                      <VolunteerHubView 
+                        drives={drives} 
+                        onSignup={handleSignupVolunteer} 
+                        alertsEnabled={alertsEnabled}
+                        onToggleAlerts={() => setAlertsEnabled(!alertsEnabled)}
+                        onTriggerSimulation={simulateNewUrgentDrive}
+                      />
                     </motion.div>
                   )}
 
@@ -578,7 +673,14 @@ export default function App() {
                         isActive ? 'text-[#c2410c] font-extrabold' : 'text-slate-400 hover:text-slate-600'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 transition-all ${isActive ? 'scale-110 text-[#c2410c] fill-[#c2410c]/5' : ''}`} />
+                      <div className="relative">
+                        <Icon className={`w-4 h-4 transition-all ${isActive ? 'scale-110 text-[#c2410c] fill-[#c2410c]/5' : ''}`} />
+                        {item.id === 'volunteer' && unreadAlertsCount > 0 && (
+                          <span className="absolute -top-1 -right-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-600 text-[8px] font-black text-white border border-black animate-pulse">
+                            {unreadAlertsCount}
+                          </span>
+                        )}
+                      </div>
                       <span>{item.label}</span>
                       {isActive && (
                         <motion.span
@@ -589,6 +691,46 @@ export default function App() {
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Floating local push-like Toast Notifications overlay */}
+              <div className="absolute top-16 left-3 right-3 z-50 pointer-events-none flex flex-col gap-2">
+                <AnimatePresence>
+                  {toasts.map((toast) => (
+                    <motion.div
+                      key={toast.id}
+                      initial={{ opacity: 0, y: -40, scale: 0.92 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                      onClick={() => {
+                        setActiveTab('volunteer');
+                        setToasts((prev) => prev.filter((t) => t.id !== toast.id));
+                        setUnreadAlertsCount(0);
+                      }}
+                      className="pointer-events-auto bg-[#1a1a1a] text-white p-3.5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(220,38,38,1)] flex items-start gap-3 cursor-pointer select-none hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                    >
+                      <div className="p-2 bg-red-600 text-white rounded-xl border border-black shrink-0 animate-bounce">
+                        <Bell className="w-4 h-4 fill-white/10" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-0.5 text-left">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-[10px] font-black text-red-500 uppercase tracking-wider block">🚨 Urgent Emergency</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setToasts((prev) => prev.filter((t) => t.id !== toast.id));
+                            }}
+                            className="text-gray-400 hover:text-white text-xs font-black cursor-pointer px-1 block"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <h6 className="text-xs font-black uppercase truncate leading-tight">{toast.title.replace('🚨 Urgent: ', '')}</h6>
+                        <p className="text-[10px] text-gray-300 font-medium leading-relaxed">{toast.message}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
 
             </div>

@@ -5,15 +5,39 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, MapPin, Users, Award, ShieldAlert, Sparkles, Smile, CheckCircle } from 'lucide-react';
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Award, 
+  ShieldAlert, 
+  Sparkles, 
+  Smile, 
+  CheckCircle,
+  Bell,
+  BellRing,
+  BellOff,
+  Volume2,
+  Zap
+} from 'lucide-react';
 import { VolunteerDrive } from '../types';
 
 interface VolunteerHubViewProps {
   drives: VolunteerDrive[];
   onSignup: (driveId: string, signup: { name: string; email: string; phone: string }) => void;
+  alertsEnabled: boolean;
+  onToggleAlerts: () => void;
+  onTriggerSimulation: () => void;
 }
 
-export default function VolunteerHubView({ drives, onSignup }: VolunteerHubViewProps) {
+export default function VolunteerHubView({ 
+  drives, 
+  onSignup,
+  alertsEnabled,
+  onToggleAlerts,
+  onTriggerSimulation
+}: VolunteerHubViewProps) {
   const [selectedDrive, setSelectedDrive] = useState<VolunteerDrive | null>(null);
   const [signupForm, setSignupForm] = useState({ name: '', email: '', phone: '' });
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -72,6 +96,59 @@ export default function VolunteerHubView({ drives, onSignup }: VolunteerHubViewP
         </div>
       </div>
 
+      {/* Volunteer Alert & Push-Notification Toggle */}
+      <div className="p-4 rounded-3xl bg-amber-50/70 border-2 border-black shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] space-y-3.5 text-[#1a1a1a]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className={`p-2 rounded-xl border-2 border-black text-amber-700 bg-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] ${alertsEnabled ? 'animate-bounce' : ''}`}>
+              {alertsEnabled ? <BellRing className="w-4.5 h-4.5 text-orange-600 fill-orange-500/10" /> : <BellOff className="w-4.5 h-4.5 text-slate-400" />}
+            </div>
+            <div>
+              <h5 className="text-xs font-black uppercase tracking-wider">Urgent Action Alerts</h5>
+              <p className="text-[10px] text-gray-500 font-bold">Real-time local push-like emergency indicators</p>
+            </div>
+          </div>
+          
+          {/* iOS-like Toggle */}
+          <button
+            onClick={onToggleAlerts}
+            className={`w-12 h-6 rounded-full border-2 border-black transition-colors relative cursor-pointer outline-none ${
+              alertsEnabled ? 'bg-orange-500' : 'bg-slate-200'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-4 h-4 rounded-full border border-black bg-white transition-all ${
+                alertsEnabled ? 'left-[26px]' : 'left-0.5'
+              }`}
+            />
+          </button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 border-2 border-black rounded-2xl">
+          <div className="space-y-0.5">
+            <span className="text-[8px] font-mono font-black text-slate-400 uppercase tracking-widest block">
+              {alertsEnabled ? '● LIVE MONITOR ACTIVE' : '○ NOTIFICATIONS INACTIVE'}
+            </span>
+            <p className="text-[10px] text-gray-600 font-medium">
+              We notify you immediately when emergency kitchen support or heavy monsoon drives are posted.
+            </p>
+          </div>
+          
+          <button
+            onClick={onTriggerSimulation}
+            disabled={!alertsEnabled}
+            className={`py-1.5 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border-2 border-black flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0 ${
+              alertsEnabled
+                ? 'bg-amber-400 hover:bg-amber-300 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] text-[#1a1a1a]'
+                : 'bg-slate-100 text-slate-400 border-slate-300 cursor-not-allowed shadow-none'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-[#c2410c] fill-orange-500/20" />
+            <span>Simulate Post</span>
+          </button>
+        </div>
+      </div>
+
       {/* Drives List */}
       <div className="space-y-4">
         <h4 className="font-display font-black text-[#1a1a1a] text-sm tracking-wide uppercase">Upcoming Volunteering Drives</h4>
@@ -79,11 +156,21 @@ export default function VolunteerHubView({ drives, onSignup }: VolunteerHubViewP
         <div className="space-y-4">
           {drives.map((drive) => {
             const isFull = drive.spotsRegistered >= drive.spotsMax;
+            const isUrgent = (drive as any).isUrgent;
             return (
               <div
                 key={drive.id}
-                className="p-5 rounded-3xl bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] transition-all space-y-4"
+                className={`p-5 rounded-3xl bg-white border-2 border-black transition-all space-y-4 relative overflow-hidden ${
+                  isUrgent 
+                    ? 'border-red-600 shadow-[4px_4px_0px_0px_rgba(220,38,38,1)] bg-rose-50/10' 
+                    : 'shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]'
+                } hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]`}
               >
+                {isUrgent && (
+                  <div className="absolute top-0 right-0 bg-red-600 text-white text-[8px] font-black uppercase px-2.5 py-1 rounded-bl-xl tracking-wider border-l border-b border-black">
+                    🚨 Urgent Emergency
+                  </div>
+                )}
                 <div className="flex justify-between items-start gap-3">
                   <div>
                     <span className="px-2.5 py-0.5 rounded-full bg-[#1a1a1a] text-[9px] font-black text-white uppercase tracking-wider">
